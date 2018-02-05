@@ -1,0 +1,72 @@
+---
+title: "ATTACHOT_DATA607SP2018_Assignment1"
+author: "Go Attachot"
+date: "2/4/2018"
+output: html_document
+---
+
+#### WEERAPAT (GO) ATTACHOT
+#### CUNY SPS, SPRING 2018, DATA 607
+#### Assignment 1, Loading Data into a Data Frame
+#### February 4, 2018
+
+# About the Data
+
+### Citation: Mushroom records drawn from The Audubon Society Field Guide to North American Mushrooms (1981). G. H. Lincoff (Pres.), New York: Alfred A. Knopf.
+
+# Data preparation: Read full dataset in to R and display the dataset
+``` {r}
+library(readr)
+library(RCurl)
+library(plyr)
+Mushroom <- read.csv("http://raw.github.com/aweerapat/DATA607SP2018/master/Mushroom.csv", header = FALSE)
+names(Mushroom) <- c("classes", "cap-shape", "cap-surface", "cap-color", "bruises", "odor", "gill-attachment", "gill-spacing", "gill-size", "gill-color", "stalk-shape", "stalk-root", "stalk-surface-above-ring", "stalk-surface-below-ring", "stalk-color-above-ring", "stalk-color-below-ring", "veil-type", "veil-color", "ring-number", "ring-type", "spore-print-color", "population", "habitat")
+```
+``` {r}
+head(Mushroom)
+```
+
+# Choose five (5) columns and update data type so that the original one-letter code can be converted to a full-text explanation.
+``` {r}
+Mushroom$classes <- as.character(Mushroom$classes)
+Mushroom$`cap-shape` <- as.character(Mushroom$`cap-shape`)
+Mushroom$bruises <- as.character(Mushroom$bruises)
+Mushroom$`veil-color` <- as.character(Mushroom$`veil-color`)
+Mushroom$habitat <- as.character(Mushroom$habitat)
+```
+
+# Replace the abbreviations in the five columns chosen with the full descriptions, as outlined in the data dictionary.
+``` {r}
+Mushroom$classes[Mushroom$classes == "e"] <- "Edible"
+Mushroom$classes[Mushroom$classes == "p"] <- "Poisonous"
+Mushroom$`cap-shape`[Mushroom$`cap-shape` == "b"] <- "bell"
+Mushroom$`cap-shape`[Mushroom$`cap-shape` == "c"] <- "conical"
+Mushroom$`cap-shape`[Mushroom$`cap-shape` == "x"] <- "convex"
+Mushroom$`cap-shape`[Mushroom$`cap-shape` == "f"] <- "flat"
+Mushroom$`cap-shape`[Mushroom$`cap-shape` == "k"] <- "knobbed"
+Mushroom$`cap-shape`[Mushroom$`cap-shape` == "s"] <- "sunken"
+Mushroom$bruises[Mushroom$bruises == "t"] <- "bruises"
+Mushroom$bruises[Mushroom$bruises == "f"] <- "no-bruises"
+Mushroom$`veil-color`[Mushroom$`veil-color` == "n"] <- "brown"
+Mushroom$`veil-color`[Mushroom$`veil-color` == "o"] <- "orange"
+Mushroom$`veil-color`[Mushroom$`veil-color` == "w"] <- "white"
+Mushroom$`veil-color`[Mushroom$`veil-color` == "y"] <- "yellow"
+Mushroom$habitat[Mushroom$habitat == "g"] <- "grasses"
+Mushroom$habitat[Mushroom$habitat == "l"] <- "leaves"
+Mushroom$habitat[Mushroom$habitat == "m"] <- "meadows"
+Mushroom$habitat[Mushroom$habitat == "p"] <- "paths"
+Mushroom$habitat[Mushroom$habitat == "u"] <- "urban"
+Mushroom$habitat[Mushroom$habitat == "w"] <- "waste"
+Mushroom$habitat[Mushroom$habitat == "d"] <- "woods"
+```
+
+# Create a data frame containing a subset of the main dataset.  This data frame contains 5 columns and the first 50 lines of the dataset.
+``` {r}
+Mushroom.DataFrame <- data.frame(Mushroom[(1:50), c(1, 2, 5, 18, 23)])
+```
+
+# Display a data frame to confirm that the desire results are created.
+``` {r}
+head(Mushroom.DataFrame)
+View(Mushroom.DataFrame)
+```
