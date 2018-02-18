@@ -1,0 +1,113 @@
+---
+title: "ATTACHOT_DATA607SP2018_Assignment2"
+author: "Go Attachot"
+date: "2/18/2018"
+output: html_document
+---
+
+#### WEERAPAT (GO) ATTACHOT
+#### CUNY SPS, SPRING 2018, DATA 607
+#### Assignment 3, R Character Manipulation and Date Processing
+#### February 18, 2018
+
+# Problem 3: Copy the introductory example.  The vector name stores the extracted names
+### Data preparation: Read the raw data provided into R
+```{r}
+library(readr)
+library(stringr)
+raw.data <-"555-1239Moe Szyslak(636) 555-0113Burns, C. Montgomery555-6542Rev. Timothy Lovejoy555 8904Ned Flanders636-555-3226Simpson, Homer5553642Dr. Julius Hibbert"
+```
+
+### Extract names from the raw data and keep them in vector name as specify by the question
+```{r}
+name <- unlist(str_extract_all(raw.data, "[[:alpha:],. ]{2,}"))
+name
+```
+
+## Question 1: Use the tools of this chapter to rearrange the vector so that all elements conform to the standard first_name last_name
+```{r}
+# Reformat the names that are not in the format we need
+namewithcomma <- str_split(name, ", ", simplify = TRUE)
+FName_LName <- str_c(namewithcomma[, 2], namewithcomma[, 1])
+FName_LName <- str_replace(FName_LName, "([a-z])([A-Z])", "\\1 \\2")
+```
+```{r}
+# Now we have the names in the First Name and Last Name order (but still with the title)
+FName_LName
+```
+```{r}
+# Additional modification to remove the title from all names
+Q3.1NameNoTitle <- str_replace(FName_LName, "[[:alpha:]]{2,}\\. ", "")
+```
+```{r}
+# Display the names as required by the question
+Q3.1NameNoTitle
+```
+
+## Question 2: Construct a logical vector indicating whether a character has a title (i.e., Rev. and Dr.)
+```{r}
+Q3.2CheckForTitle <- str_detect(FName_LName, "[[:alpha:]]{2,}\\.")
+```
+```{r}
+# Result for Question 2
+Q3.2CheckForTitle
+```
+
+## Question 3: Construct a logical vector indicating whether a character has a second name
+```{r}
+Q3.3CheckForSecondName <- str_detect(name, " [A-z]{1,}\\. ")
+```
+```{r}
+# Result for Question 3
+Q3.3CheckForSecondName
+```
+
+# Problem 4: Describe the types of strings that conform to the following regular expressions and construct an example that is matched by the regular expression
+
+## Question 1: [0-9]+\\$
+#### A string contains at least one digit of number between 0 and 9 followed by "$"
+```{r}
+# Example of string extraction for Question 1
+str_extract_all("My tuition at CUNY SPS this semester is US2,740$", "[0-9]+\\$")
+```
+
+## Question 2: \\b[a-z]{1,4}\\b
+#### A string contains between one and four lowercase characters (a to z)
+```{r}
+# Example of string extraction for Question 2
+str_extract_all("My tuition at CUNY SPS this semester is US2,740$", "\\b[a-z]{1,4}\\b")
+```
+
+## Question 3: .*?\\.txt$
+#### A string contains any type of number or character of any length that is esstentially a name of a text file (.txt)
+```{r}
+# Example of string extraction for Question 3
+str_extract_all("A file I used yesterday was CUNYSPS.txt", ".*?\\.txt$")
+```
+
+## Question 4: \\d{2}/\\d{2}/\\d{4}
+#### A string contains a total of eight (8) digits of number in the format similar to month/date/year or date/month/year e.g. 13/01/2018 or 01/20/2018
+```{r}
+# Example of string extraction for Question 4
+str_extract_all("My dog was born on 01/12/2009", "\\d{2}/\\d{2}/\\d{4}")
+```
+
+## Question 5: <(.+?)>.+?</\\1>
+#### A string contains a set of characters similar to HTML codes with <...> XXX </...> format.  The string search will look for a set of characters enclosed between <...> and </...> format.
+```{r}
+# Example of string extraction for Question 5
+str_extract_all("A sample of HTML code I learn is <head>TEST_TEST_TEST</head>", "<(.+?)>.+?</\\1>")
+```
+
+# Problem 9: The following code hides a secret message.  Crack it with R and regular expressions.  Hint: Some of the characters are more revealing than others!  The code snippet is also available in the materials at www.r-datacllection.com
+### Data preparation: Read the secret code provided into R
+```{r}
+Q9SecretCode <- "clcopCow1zmstc0d87wnkig7OvdicpNuggvhryn92Gjuwczi8hqrfpRxs5Aj5dwpn0TanwoUwisdij7Lj8kpf03AT5Idr3coc0bt7yczjatOaootj55t3Nj3ne6c4Sfek.r1w1YwwojigOd6vrfUrbz2.2bkAnbhzgv4R9i05zEcrop.wAgnb.SqoU65fPa1otfb7wEm24k6t3sR9zqe5fy89n6Nd5t9kc4fE905gmc4Rgxo5nhDk!gr"
+```
+
+#### I can notice an uppercase letter hidden among these mass of texts so this is what I will try
+```{r}
+hiddenmessage <- str_extract_all(Q9SecretCode, "[:upper:]|[:punct:]")
+unlist(hiddenmessage)
+```
+
