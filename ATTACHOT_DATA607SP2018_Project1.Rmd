@@ -1,0 +1,108 @@
+---
+title: "ATTACHOT_DATA607SP2018_PROJECT1"
+author: "Go Attachot"
+date: "2/25/2018"
+output: html_document
+---
+
+#### WEERAPAT (GO) ATTACHOT
+#### CUNY SPS, SPRING 2018, DATA 607
+#### Project 1, Preparing chess tournament data in a CSV format
+#### February 25, 2018
+
+### Data preparation: Read the raw data provided into R
+```{r}
+library(readr)
+library(stringr)
+library(dplyr)
+tournamentinfo.givendata <- readLines('tournamentinfo.txt')
+```
+
+### Clean up the dataset to get it ready for manipulation
+```{r}
+#There is noticeably "- (dash)" line separating each record.
+#So I will remove that from the dataset.
+tournamentinfo.clean <- (str_replace_all(tournamentinfo.givendata, "-{2,}", ""))
+tournamentinfo.clean <- tournamentinfo.clean[tournamentinfo.clean != ""]
+```
+
+#### Take a look at what the dataset looks like after the initial clean up
+```{r}
+head(tournamentinfo.clean)
+#I will not need the data header. So I will get rid of it.
+tournamentinfo.clean <- tournamentinfo.clean[-(1:2)]
+```
+
+#### Take a look at what the dataset looks like after the more clean up
+``` {r}
+head(tournamentinfo.clean)
+```
+
+#### It becomes clear that each player's information contains two lines.  The data points we need from the first line are player's ID, player name, player's total points, and player's opponent's IDs.  The data points we need from the second line are the player's State and player's pre-rating.  Therefore, I will split the two lines of data into two separate dataframe so that I can use data manipulation commands to search, replace, match etc. as needed.
+```{r}
+tournamentinfo.line01 <- tournamentinfo.clean[str_detect(str_sub(tournamentinfo.clean, 1, 6), "[0-9]")]
+
+#Take a peek of what Line 1 it looks like
+head(tournamentinfo.line01)
+tournamentinfo.line02 <- tournamentinfo.clean[str_detect(str_sub(tournamentinfo.clean, 1, 6), "[A-Z]{2,2}")]
+
+#Take a peek of what Line 2 it looks like
+head(tournamentinfo.line02)
+```
+
+#### Fun search begins here.  I am now looking up the data point I need
+```{r}
+#Player ID
+PlayerID <- as.integer(str_extract(tournamentinfo.line01, "\\d+"))
+#Player Name
+PlayerName <- str_trim(str_extract(tournamentinfo.line01, "(\\w+\\s){2,3}"))
+#Player's Total Points
+PlayerTotalPoints <- as.numeric(str_extract(tournamentinfo.line01, "\\d.\\d"))
+#Player's Opponent's IDs
+PlayerOpponentIDs <- str_extract_all(str_extract_all(tournamentinfo.line01, "\\d+\\|"), "\\d+")
+#Player's Pre-Rating
+PlayerPreRatings <- as.integer(str_extract(str_extract(tournamentinfo.line02, "\\D\\d{3,4}\\D"), "\\d+"))
+#Player's State
+PlayerState <- str_extract(tournamentinfo.line02, "\\w\\w")
+```
+
+#### How do the data points look like now?
+```{r}
+#The temporary dataframe #01 shows the list of four (out of five) required variables I need so far.
+temp_dataframe01 <- data_frame(PlayerName, PlayerState, PlayerTotalPoints, PlayerPreRatings)
+head(temp_dataframe01)
+```
+
+#### Calculating a player's opponent's average pre-ratings.
+#### https://stackoverflow.com/questions/35636315/replace-values-in-a-dataframe-based-on-lookup-table is the primary one helping me figure this out.
+```{r}
+NumObservations <- sapply(PlayerOpponentIDs, length)
+MaxSequence <- seq_len(max(NumObservations))
+Matching <- t(sapply(PlayerOpponentIDs,"[", i=MaxSequence))
+temp_dataframe02 <- as.data.frame(Matching)
+
+#The temporary dataframe #02 shows the list of all opponent's IDs each player plays againts in each of the seven rounds.  Some players compete less than seven rounds.
+head(temp_dataframe02)
+```
+```{r}
+#Create the temporary dataframe #03 as an intermediate table to calcalate a player's opponent's average pre-ratings, which is the last required variable.
+temp_dataframe03 <- data.frame(PlayerID, PlayerPreRatings)
+temp_dataframe02[ ] <- temp_dataframe03$PlayerPreRatings[match(unlist(temp_dataframe02), temp_dataframe03$PlayerID)]
+head(temp_dataframe02)
+
+#Calculate a player's opponent's average pre-ratings
+temp_dataframe02$PlayerOpponentAverageRatings <- round(apply(temp_dataframe02, 1, mean, na.rm=TRUE))
+head(temp_dataframe02)
+```
+
+#### Putting all required five variables together
+```{r}
+FinalDataSet <- data_frame(PlayerName, PlayerState, PlayerTotalPoints, PlayerPreRatings, temp_dataframe02$PlayerOpponentAverageRatings)
+colnames(FinalDataSet) <- c("Name of Player", "Home State of Player", "Total Points Earned by Player", "Pre-Ratings of Player", "Average Player's Opponent's Pre-Rating")
+head(FinalDataSet)
+```
+
+#### Generate a CSV file
+```{r eval=FALSE}
+write.csv(FinalDataSet, "ATTACHOT_DATA607SP2018_Project1.csv")
+```
