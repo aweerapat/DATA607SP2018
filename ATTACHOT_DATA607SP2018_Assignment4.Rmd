@@ -1,0 +1,45 @@
+---
+title: "ATTACHOT_DATA607SP2018_Assignment4"
+author: "Go Attachot"
+date: "3/4/2018"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+#### WEERAPAT (GO) ATTACHOT
+#### CUNY SPS, SPRING 2018, DATA 607
+#### Assignment 4, Tidying and Transforming Data
+#### March 4, 2018
+
+### Data preparation: Load necessary packages and read the CSV file into R
+```{r}
+library(stringr)
+library(dplyr)
+library(knitr)
+library(tidyr)
+rawdata <- read.csv("ATTACHOT_DataForAssignment4.csv", header = FALSE, sep = ",", stringsAsFactors = FALSE)
+head(rawdata)
+```
+
+### Recreate the column and row names to get data ready for analyses.
+```{r}
+rawdata$V1[1] <- "Airline"
+rawdata$V2[1] <- "Flight Status"
+head(rawdata)
+names(rawdata) <- rawdata[1,]
+rawdata <- rawdata[-c(1),]
+rawdata <- rawdata[-c(3),]
+rawdata$Airline[2] <- "ALASKA"
+rawdata$Airline[4] <- "AM WEST"
+```
+
+### Playing with tools from package tidyr to essentially transpose the data
+```{r}
+rawdata_format1 <- rawdata %>% gather ("Airport", "Number of Flights", 3:7)
+rawdata_format2 <- rawdata_format1 %>% spread(`Flight Status`, `Number of Flights`)
+FinalData <- rawdata_format2
+head(FinalData)
+```
+
+### Sorry I am running out of time.  I would submit the small analyses if you want to see it.
